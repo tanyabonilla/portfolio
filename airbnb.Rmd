@@ -2,8 +2,10 @@
 title: 'Airbnb: Understanding the Data'
 author: "Tanya Bonilla"
 output:
-  pdf_document: default
+  html_document:
+    df_print: paged
   html_notebook: default
+  pdf_document: default
 ---
 
 # Describe the source
