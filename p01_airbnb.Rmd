@@ -1,0 +1,97 @@
+---
+title: 'Airbnb: Tidying the Data'
+author: "Tanya Bonilla"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+# Describe the source
+  This Airbnb dataset was downloaded from the site, Inside Airbnb, which provides "independent, non-commercial set of tools and data that allows you to explore how Airbnb is really being used in cities around the world." The dataset originally had 48,864 listings before it was truncated down to 1,509 listings due to data restrictions. The reason why I chose Airbnb is because I am interested in seeing how much people are willing to spend on staying in other people's homes and the effect it has had on hotels.
+  There did not seem to be much limitations of the source beyond there being some missing varirables.
+  The data was compiled and distributed 06 August, 2019.
+  
+First, we import tidyverse, tidyr, dplyr, and readr libraries, to import and tidy the data. In order to have clean data, we must omit any missing observations.
+```{r}
+suppressMessages(library(tidyverse))
+suppressMessages(library(tidyr))
+suppressMessages(library(dplyr))
+suppressMessages(library(readr))
+suppressMessages(library(ggplot2))
+
+listings <- read_csv("https://raw.githubusercontent.com/tanyabonilla/portfolio/master/listings.csv", col_types = cols())
+listings <-  na.omit(listings)
+listings
+```
+## Tidying the Data
+  
+  In order to get an idea on how much data we're dealing with, we will display the number of columns and rows in the table.
+```{r explanation = FALSE}
+ncol(listings) #16 col
+nrow(listings) #1509 rows
+```
+
+```{r echo= TRUE}
+colnames(listings)
+```
+
+ In order to have the data fit into Tidy Data's criteria, we must split the dataset into 3 tables: Host, Reviews, and Listing.
+
+  Host contains the host's id, host_name, and listings_count. Host_id is a discrete variable which contains a unqiue number that represents the host, host_name is a categorical variable, and listings_count is a discrete variable which houses the amount of listings a host has uploaded.
+```{r host}
+host <- tibble (
+  host_id = listings$host_id,
+  host_name = listings$host_name,
+  listings_count = listings$calculated_host_listings_count
+)
+
+host
+```
+
+The review table is going to contain the listing_id (continuous), the listing name (categorical), the number of reviews (discrete),
+the date of the last review (continuous), and the reviews per month (discrete).
+```{r reviews}
+reviews <- tibble (
+  listing_id = listings$id,
+  name = listings$name,
+  number_of_reviews = listings$number_of_reviews,
+  date_last_review = listings$last_review,
+  reviews_per_month = listings$reviews_per_month
+)
+
+reviews
+```
+
+The listing table contains the listing_id (discrete), name (categorical), price of the listing (discrete), neighbourhood_group (categorical), neighbourhood (categorical), latitude (continuous), longitude (continuous), room_type (categorical), and the
+minimum amount of nights a guest can stay (discrete). After we create the table we are going to change neighbourhood_group, neighbourhood, and room_type to factors. By creating a graph, we can see that the neighbourhood with the most listings are Brooklyn and Manhatten.
+```{r listing} 
+listing <- tibble (
+  listing_id = listings$id,
+  name = listings$name,
+  price = listings$price,
+  neighbourhood_group = listings$neighbourhood_group,
+  neighbourhood = listings$neighbourhood,
+  latitude = listings$latitude,
+  longitude = listings$longitude,
+  room_type = listings$room_type,
+  minimum_nights = listings$minimum_nights
+)
+listing$neighbourhood_group <- as.factor(listing$neighbourhood_group)
+listing$neighbourhood <- as_factor(listing$neighbourhood)
+listing$room_type <- as_factor(listing$room_type)
+levels(listing$neighbourhood_group)
+levels(listing$neighbourhood)
+levels(listing$room_type)
+listing
+
+ggplot(listing, aes(x = neighbourhood_group)) + geom_bar()
+```
+
+# Research Questions
+
+1. What types of neighbourhood receive the most reviews? 
+2. Do the prices of the type of rooms have any effect on the reviews?
+3. Does the frequency of the host's listings affect the price of the room?
+4. Is there a relationship or any kind between the name of the listing and the availability throughout the year?
+5. How do the amount of room affect price of a listing?
