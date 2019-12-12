@@ -10,9 +10,6 @@ output: html_document
 
 Inititally, I was researching to find out how much people are willing to spend on staying in other people's homes and the effect it has had on hotels, but due to the fact I could not find data that could answer that question I decided to take another route. I'm predicting that the price of a listing is affected by the amount of bedrooms available. 
 
-NOTE TO SELF: use old dataset to further expand on predictions
-  - create model with old data set too along with new one
-  
 # Gettting started
 
 We begin by loading in *Airbnb: Tidying the Data* and any library that we plan on using throughout our analysis.
