@@ -91,7 +91,11 @@ ggplot(listing, aes(x = neighbourhood_group)) + geom_bar()
 # Research Questions
 
 1. What types of neighbourhood receive the most reviews? 
-2. Do the prices of the type of rooms have any effect on the reviews?
+2. Is the price of a listing affected by the neighborhood it's a part of?
 3. Does the frequency of the host's listings affect the price of the room?
 4. Is there a relationship or any kind between the name of the listing and the availability throughout the year?
-5. How do the amount of room affect price of a listing?
+5. How do the amount of rooms affect price of a listing?
+
+## Continue
+
+Go to ***Airbnb: Data Modeling*** at https://tanyabonilla.github.io/p02/ to see what we do with the data.
