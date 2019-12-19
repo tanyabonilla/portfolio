@@ -30,6 +30,11 @@ source("first_del.r")
 # Loading and Tidying the Data
 
 We now load in this New York json file we acquired from *Opendatasoft.com* which is a "data sharing platform teams use to access, reuse and share data that grows business." We utilze the function ***fromJSON*** from the jsonlite library. 
+
+As the data is far too large for a GitHub repository, it is opportune that you download the file with only 19528 records from the site and save it in the same folder that this .Rmd file is in:
+
+https://public.opendatasoft.com/explore/dataset/airbnb-listings/export/?disjunctive.host_verifications&disjunctive.amenities&disjunctive.features&refine.city=New+York
+
 ```{r}
 new_york <- fromJSON("airbnb-listings.json")
 colnames(new_york)
@@ -49,33 +54,56 @@ colnames(new_york$fields)
 ```
 + **record_timestamp** - character 
 
-As we are more interested in the ***fields*** dataframe within the JSON data, let's create a tibble that will hold the variables we deem important for modeling.
+As we are more interested in the ***fields*** dataframe within the JSON data, let's create a tibble that will hold the variables we deem important for modeling. 
 ```{r}
+new_york$fields$bedrooms <- as.factor(new_york$fields$bedrooms)
+#new_york$fields$bathrooms <- as.factor(new_york$fields$bathrooms)
+new_york$fields$zipcode <- as.factor(new_york$fields$zipcode)
+new_york$fields$property_type <- as_factor(new_york$fields$property_type)
+
+levels(new_york$fields$bedrooms)
+levels(new_york$fields$bathrooms)
+levels(new_york$fields$zipcode)
+levels(new_york$fields$property_type)
+
 new_york_fields <- tibble ( 
   price = new_york$fields$price,
   bathrooms = new_york$fields$bathrooms,
   bedrooms = new_york$fields$bedrooms,
-  host_neighbourhood = new_york$fields$host_neighbourhood,
-  street = new_york$fields$street,
   property_type = new_york$fields$property_type,
-  availability_365  = new_york$fields$availability_365,
   zipcode = new_york$fields$zipcode,
+  availability_365  = new_york$fields$availability_365,
   host_location = new_york$fields$host_location,
   host_listings_count = new_york$fields$host_listings_count,
   neighbourhood_group_cleansed = new_york$fields$neighbourhood_group_cleansed,
+  host_neighbourhood = new_york$fields$host_neighbourhood,
   host_id = new_york$fields$host_id,
   neighbourhood = new_york$fields$neighbourhood,
+  geolocation = new_york$fields$geolocation,
   bed_type = new_york$fields$bed_type,
   calendar_last_scraped = new_york$fields$calendar_last_scraped,
   record_timestamp = new_york$record_timestamp
 )
+
+listing_location <- tibble (
+    zipcode = new_york$fields$zipcode,
+    neighbourhood_group_cleansed = new_york$fields$neighbourhood_group_cleansed,
+    listings_street = new_york$fields$street,
+    neighbourhood = new_york$fields$neighbourhood,
+    geolocation = new_york$fields$geolocation
+)
+
+host <- tibble(
+    host_location = new_york$fields$host_location,
+    host_neighbourhood = new_york$fields$host_neighbourhood,
+    host_listings_count = new_york$fields$host_listings_count,
+)
 new_york_fields <- new_york_fields %>% drop_na()
-
+new_york_fields
 ```
-
 # Modeling
 
-Now that we have our new dataframe, we can focus on modeling the data. The plan is to find if there is any sort of relationship between the listing's price and bedrooms as we are looking to see if there is any relationship between the two. 
+Now that we have our new dataframe, we can focus on modeling the data. The plan is to find if there is any sort of relationship between the listing's price and its available bedrooms and bathrooms as we are looking to see if there is any relationship between the two. 
 
 ```{r}
 
@@ -83,7 +111,7 @@ set.seed(385)
 sample_selection <- createDataPartition(new_york_fields$price, p = 0.70, list = FALSE)
 train <- new_york_fields[sample_selection,]
 test <- new_york_fields[-sample_selection,]
-train_model <- lm(price ~ bedrooms, data = train)
+train_model <- lm(price ~ bedrooms + bathrooms, data = train)
 predictions <- train_model %>% predict(test)
 ```
 
@@ -93,10 +121,15 @@ summary(train_model)
 R2(predictions, test$price)
 MAE(predictions, test$price)
 ```
-As we can see, R^2^ is ~0.22-.23 which is much smaller than we would want. Along with MAE, which is much larger than we would want too as it is ~75.6. 
+As we can see, R^2^ is ~0.32 which is much smaller than we would want. Along with MAE, which is much larger than we would want too as it is ~68.305. 
 
 ```{r}
-ggplot(train, aes(x = train$bedrooms, y = train$price)) + geom_jitter()
+ggplot(train, aes(x = bedrooms, y = price, color = bathrooms)) + geom_jitter() + geom_smooth(method = lm)
 ```
 
-If we also take into consideration the model's p-value, we see that it is less than 2.2e^-6^ meaning there is clearly no correlation between bedrooms and price. Thus, proving our prediction false.
+Looking at the model's p-value, we can see that that there is some type of relationship between price nad bedrooms as it is < 2.2e-16.
+
+## What now...
+  After creating a model and analyzing what came of it, we go on to the operationalization and seeing if we can come up with anymore predictions. 
+  Refer to:
+    https://tanyabonilla.github.io/p03/
