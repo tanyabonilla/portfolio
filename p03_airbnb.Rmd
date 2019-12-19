@@ -1,10 +1,10 @@
 ---
-title: "p03_airbnb"
+title: "Operationalization "
 author: "Tanya Bonilla"
 date: "12/11/2019"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 # Loading in the Data
@@ -13,8 +13,11 @@ We begin with normal procedure; by loading in any data and files that are needed
 
 ```{r message=FALSE, error=FALSE, warning=FALSE, results='hide'}
 library(knitr)
+library(tidyverse)
+library(MASS)
 
 purl("p02_airbnb.Rmd", output = "second_del.r")
+source("first_del.r")
 source("second_del.r")
 ```
 
@@ -22,8 +25,8 @@ As I feel like there is more to discover in the  ***Airbnb: Data Modeling***, we
 
 ## Creating a New Model & Cross-Validation
 
-Let's look at and define the new_york_fields tibble we created in ***Data Modeling***. Here, we will look at the price compared to the neighborhood the data was cleansed from, the type of bed provided by the host, and the availability of the listing throughout the year.
-```{r p02}
+Let's look at and define the new_york_fields tibble we created in ***Data Modeling***. Here, we will look at the price compared to the neighborhood the data was cleansed from, the type of bed provided by the host, and the availability of the listing throughout the year. From the graph we can see that there is a positive correlation between availability and price. 
+```{r}
 new_york_fields$bed_type <- as.factor(new_york_fields$bed_type)
 
 model <- lm(price ~ neighbourhood_group_cleansed + bed_type + availability_365, data = new_york_fields)
@@ -31,8 +34,8 @@ model
 
 ggplot(model, aes(x = availability_365, y =price))+ geom_jitter() + geom_smooth(method= lm)
 ```
-
-```{r cross_val}
+Now we will cross-validate the model we created by splitting the data by reating a 70-30 partition and storing 70% of the data in **train** and the other bit in **test**.
+```{r}
 set.seed(385)
 sample_selection <- createDataPartition(new_york_fields$price, p = 0.70, list = FALSE)
 train <- new_york_fields[sample_selection,]
@@ -47,6 +50,7 @@ summary(train_model)
 R2(predictions, test$price)
 MAE(predictions, test$price)
 ```
+As we can see, R^2^ is ~0.022 which is much smaller than we would want; much smaller than the last model in the second deliverable. Along with MAE, which is much larger than we would want too as it is ~80.8. The p-value in the results did change in this case either meaning there must be some relationship that should be further explored. 
 
 ## Operationalization
 
@@ -56,4 +60,4 @@ MAE(predictions, test$price)
   Some consequences that could come from informing consumers about such findings though are that some hosts on Airbnb could lose revenue due to the change in consumer wants. Say their place is nice menaing their price is higher, then there is a chance a potential client could look elsewhere. Another consequence would be that small-business motels/inns or B8B's lose clientele as well. 
   
 ## What next...
-When I first began this project, I had a vision to coompare hotel listings with those of Airbnb's, but I could not find a suitable dataset that would allow me to conduct such an analysis. A future goal for this assignment  would be 
+When I first began this project, I had a vision to coompare hotel listings with those of Airbnb's, but I could not find a suitable dataset that would allow me to conduct such an analysis. A future goal for this assignment would be to compile data of hotel prices in New York over a span of time and compare them to those of Airbnb's. 
