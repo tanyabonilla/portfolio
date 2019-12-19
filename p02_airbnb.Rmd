@@ -57,7 +57,6 @@ colnames(new_york$fields)
 As we are more interested in the ***fields*** dataframe within the JSON data, let's create a tibble that will hold the variables we deem important for modeling. 
 ```{r}
 new_york$fields$bedrooms <- as.factor(new_york$fields$bedrooms)
-#new_york$fields$bathrooms <- as.factor(new_york$fields$bathrooms)
 new_york$fields$zipcode <- as.factor(new_york$fields$zipcode)
 new_york$fields$property_type <- as_factor(new_york$fields$property_type)
 
@@ -93,7 +92,7 @@ listing_location <- tibble (
     geolocation = new_york$fields$geolocation
 )
 
-host <- tibble(
+host_info <- tibble(
     host_location = new_york$fields$host_location,
     host_neighbourhood = new_york$fields$host_neighbourhood,
     host_listings_count = new_york$fields$host_listings_count,
